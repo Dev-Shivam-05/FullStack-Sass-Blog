@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏠 Smart Home Journey - Transform Your Life in 60 Days</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --dark-lighter: #334155;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Onboarding Screen */
+        .onboarding {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--dark), var(--dark-light));
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .onboarding.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .onboarding-content {
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .onboarding h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .onboarding-emoji {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .onboarding p {
+            font-size: 1.125rem;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .start-date-picker {
+            background: var(--dark-light);
+            border: 2px solid var(--border);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .start-date-picker label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-date-picker input {
+            width: 100%;
+            background: var(--dark);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+        }
+
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Header with Progress */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+        }
+
+        .header-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .day-info {
+            flex: 1;
+        }
+
+        .day-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.25rem;
+        }
+
+        .day-number {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .day-date {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+        }
+
+        .header-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            text-align: right;
+        }
+
+        .stat-box {
+            background: var(--dark-light);
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: block;
+            background: linear-gradient(135deg, var(--success), #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.625rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .progress-container {
+            margin-top: 1rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        .progress-percent {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--dark-lighter);
+            border-radius: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+            background-size: 200% 100%;
+            border-radius: 100px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+        }
+
+        /* Content Container */
+        .content {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 100px;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 2rem;
+            border-radius: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="2" fill="white" opacity="0.1"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-banner h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-banner p {
+            font-size: 1rem;
+            opacity: 0.95;
+            margin-bottom: 1rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 0.625rem 1.25rem;
+            border-radius: 100px;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .action-card {
+            background: var(--dark-light);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:active {
+            transform: scale(0.95);
+        }
+
+        .action-card.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-color: var(--primary);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .action-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 0.25rem;
+        }
+
+        /* Task Section */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-count {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            background: var(--dark-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+        }
+
+        /* Person Section */
+        .person-container {
+            margin-bottom: 2rem;
+        }
+
+        .person-header {
+            background: var(--dark-light);
+            border: 1px solid var(--border);
+            border-radius: 1rem 1rem 0 0;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .person-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .person-avatar.shivam {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        }
+
+        .person-avatar.nurul {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+        }
+
+        .person-info h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .person-info p {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            margin-top: 0.125rem;
+        }
+
+        .person-progress {
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .person-progress-value {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--success);
+        }
+
+        .person-progress-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        /* Task Cards */
+        .task-list {
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 1rem 1rem;
+            overflow: hidden;
+        }
+
+        .task-card {
+            background: var(--dark-light);
+            border-bottom: 1px solid var(--border);
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .task-card:last-child {
+            border-bottom: none;
+        }
+
+        .task-card:active {
+            background: var(--dark-lighter);
+        }
+
+        .task-card.completed {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.04));
+        }
+
+        .task-card.completed::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--success);
+        }
+
+        .task-main {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .checkbox {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .task-card.completed .checkbox {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .checkbox::after {
+            content: '✓';
+            color: white;
+            font-weight: 800;
+            font-size: 1.125rem;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .task-card.completed .checkbox::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-time {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.25rem 0.625rem;
+            border-radius: 100px;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.375rem;
+            line-height: 1.4;
+        }
+
+        .task-description {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .task-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .task-link:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .task-resource {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            padding: 0.75rem;
+            background: var(--dark);
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            padding: 0.75rem 0.5rem;
+            z-index: 100;
+        }
+
+        .nav-content {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-around;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.625rem;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            top: -0.75rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 100px;
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+
+        .nav-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.75rem;
+            background: var(--danger);
+            color: white;
+            font-size: 0.625rem;
+            font-weight: 700;
+            padding: 0.125rem 0.375rem;
+            border-radius: 100px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        /* Views */
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Sparky Mascot */
+        .sparky-container {
+            position: fixed;
+            bottom: 90px;
+            right: 1rem;
+            z-index: 150;
+            cursor: pointer;
+        }
+
+        .sparky {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.5);
+            animation: float 3s ease-in-out infinite;
+            position: relative;
+        }
+
+        .sparky::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 5px;
+        }
+
+        .sparky::after {
+            content: '';
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 14px;
+            background: var(--warning);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+            50% { transform: translateX(-50%) scale(1.3); opacity: 0.6; }
+        }
+
+        .sparky-message {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            background: white;
+            color: var(--dark);
+            padding: 0.875rem 1.125rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sparky-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sparky-message::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            right: 25px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid white;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            z-index: 300;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-dim);
+            font-size: 1rem;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 200;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--dark);
+            border-radius: 1.5rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--dark);
+            z-index: 1;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            padding-right: 2rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--dark-light);
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--dark-lighter);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, var(--success), #059669);
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .day-number {
+                font-size: 4rem;
+            }
+
+            .sparky {
+                width: 90px;
+                height: 90px;
+                font-size: 3rem;
+            }
+
+            .sparky-container {
+                right: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Onboarding Screen -->
+    <div class="onboarding" id="onboarding">
+        <div class="onboarding-content">
+            <div class="onboarding-emoji">🏠🤖</div>
+            <h1>60-Day Journey</h1>
+            <p>Transform your home with AI & IoT! Set your start date and let's build something amazing together.</p>
+            
+            <div class="start-date-picker">
+                <label for="startDate">When do you start?</label>
+                <input type="date" id="startDate" required>
+            </div>
+            
+            <button class="start-btn" onclick="startJourney()">
+                🚀 Begin Your Journey
+            </button>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-main">
+                    <div class="day-info">
+                        <div class="day-label">Current Day</div>
+                        <div class="day-number" id="currentDay">1</div>
+                        <div class="day-date" id="currentDate">Loading...</div>
+                    </div>
+                    <div class="header-stats">
+                        <div class="stat-box">
+                            <span class="stat-value" id="streakCount">0</span>
+                            <span class="stat-label">🔥 Streak</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-value" id="completedCount">0</span>
+                            <span class="stat-label">✓ Done</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-text">Journey Progress</span>
+                        <span class="progress-percent" id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Today View -->
+            <div id="todayView" class="view active">
+                <div class="hero-banner">
+                    <div class="hero-content">
+                        <h2 id="todayTitle">Loading...</h2>
+                        <p id="todayGoal">Preparing your mission...</p>
+                        <div class="hero-badge">
+                            <span id="todayEmoji">🎯</span>
+                            <span id="todayMilestone">Let's go!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <div class="action-card primary" onclick="switchView('today')">
+                        <div class="action-icon">🎯</div>
+                        <div class="action-title">Today's Tasks</div>
+                        <div class="action-subtitle" id="todayTaskCount">0 tasks</div>
+                    </div>
+                    <div class="action-card" onclick="switchView('schedule')">
+                        <div class="action-icon">📅</div>
+                        <div class="action-title">Full Schedule</div>
+                        <div class="action-subtitle">60 days</div>
+                    </div>
+                    <div class="action-card" onclick="switchView('progress')">
+                        <div class="action-icon">📊</div>
+                        <div class="action-title">My Progress</div>
+                        <div class="action-subtitle" id="progressTaskCount">0 completed</div>
+                    </div>
+                    <div class="action-card" onclick="showHelp()">
+                        <div class="action-icon">❓</div>
+                        <div class="action-title">Help Guide</div>
+                        <div class="action-subtitle">How to use</div>
+                    </div>
+                </div>
+
+                <div id="todayTasksContainer"></div>
+            </div>
+
+            <!-- Schedule View -->
+            <div id="scheduleView" class="view">
+                <div class="section-header">
+                    <div class="section-title">
+                        📅 60-Day Schedule
+                    </div>
+                </div>
+                <div id="scheduleContainer"></div>
+            </div>
+
+            <!-- Progress View -->
+            <div id="progressView" class="view">
+                <div class="section-header">
+                    <div class="section-title">
+                        📊 Your Progress
+                    </div>
+                </div>
+                <div id="progressContainer"></div>
+            </div>
+        </div>
+
+        <!-- Sparky Mascot -->
+        <div class="sparky-container" onclick="interactWithSparky()">
+            <div class="sparky-message" id="sparkyMessage">Click me! 👋</div>
+            <div class="sparky">🤖</div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-content">
+                <div class="nav-item active" data-view="today" onclick="switchView('today')">
+                    <div class="nav-icon">🎯</div>
+                    <div>Today</div>
+                </div>
+                <div class="nav-item" data-view="schedule" onclick="switchView('schedule')">
+                    <div class="nav-icon">📅</div>
+                    <div>Schedule</div>
+                </div>
+                <div class="nav-item" data-view="progress" onclick="switchView('progress')">
+                    <div class="nav-icon">📊</div>
+                    <div>Progress</div>
+                    <div class="nav-badge" id="progressBadge" style="display: none;">0</div>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Modal Title</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Complete 60-day schedule data
+        const schedule = {
+            1: {
+                date: "Day 1 - Setup Foundation",
+                shivamTasks: [
+                    {time: "6:00-7:00 PM", task: "Install Python from python.org", resource: "https://youtu.be/kqtD5dpn9C8", description: "Watch 'Python in 1 Hour' by Mosh - Learn basics"},
+                    {time: "7:00-8:00 PM", task: "Learn basic Python syntax", resource: "Practice variables, loops, functions", description: "Write your first Python script"},
+                    {time: "8:00-9:00 PM", task: "Install VS Code + Extensions", resource: "Python extension, Git", description: "Setup your development environment"},
+                ],
+                nurulTasks: [
+                    {time: "6:00-7:00 PM", task: "Install Arduino IDE", resource: "https://youtu.be/fJWR7dBuc18", description: "Learn Arduino Basics from scratch"},
+                    {time: "7:00-8:00 PM", task: "Blink LED tutorial", resource: "First Arduino program", description: "Understand digitalWrite function"},
+                    {time: "8:00-9:00 PM", task: "Setup breadboard & components", resource: "Organize workspace", description: "Test all electronic components"},
+                ],
+                combinedGoal: "Both environments ready - First light controlled!",
+                milestone: "Foundation Complete ✓",
+                emoji: "🎯"
+            },
+            2: {
+                date: "Day 2 - Basic Control",
+                shivamTasks: [
+                    {time: "6:00-7:00 PM", task: "Learn GPIO basics", resource: "GPIO pin numbering", description: "Understand Raspberry Pi GPIO"},
+                    {time: "7:00-8:30 PM", task: "Python GPIO library", resource: "RPi.GPIO tutorial", description: "Control pins with Python"},
+                    {time: "8:30-9:00 PM", task: "Light control script", resource: "ON/OFF commands", description: "Test with LED first"},
+                ],
+                nurulTasks: [
+                    {time: "6:00-7:00 PM", task: "Relay module theory", resource: "How relays work", description: "Learn safety precautions"},
+                    {time: "7:00-8:30 PM", task: "Wire relay to Arduino", resource: "Relay + 220V light", description: "SAFETY FIRST - use multimeter"},
+                    {time: "8:30-9:00 PM", task: "Test relay switching", resource: "ON/OFF control", description: "Verify safe operation"},
+                ],
+                combinedGoal: "Control real 220V light via computer!",
+                milestone: "First Automation ⚡",
+                emoji: "💡"
+            },
+            3: {
+                date: "Day 3 - Motion Detection",
+                shivamTasks: [
+                    {time: "6:00-7:00 PM", task: "PIR sensor basics", resource: "Motion detection theory", description: "Understand sensor output"},
+                    {time: "7:00-8:00 PM", task: "Read sensor in Python", resource: "Digital input reading", description: "Detect motion events"},
+                    {time: "8:00-9:00 PM", task: "Auto light on motion", resource: "Sensor + relay combo", description: "Basic automation logic"},
+                ],
+                nurulTasks: [
+                    {time: "6:00-7:00 PM", task: "Install PIR sensor", resource: "HC-SR501 module", description: "Mount in test location"},
+                    {time: "7:00-8:00 PM", task: "Calibrate sensitivity", resource: "Adjust range & delay", description: "Tune for room size"},
+                    {time: "8:00-9:00 PM", task: "Wire to control board", resource: "Connect to GPIO", description: "Test motion response"},
+                ],
+                combinedGoal: "Lights ON automatically when entering room!",
+                milestone: "Smart Detection 👀",
+                emoji: "🚶"
+            },
+            // Add remaining days here...
+        };
+
+        // App State
+        let state = {
+            startDate: null,
+            currentDay: 1,
+            completedTasks: {},
+            streak: 0,
+            achievements: [],
+            lastLoginDate: null
+        };
+
+        // Initialize app
+        function init() {
+            loadState();
+            if (state.startDate) {
+                calculateCurrentDay();
+                document.getElementById('onboarding').classList.add('hidden');
+                document.getElementById('app').style.display = 'block';
+                updateUI();
+                setTimeout(() => showSparkyMessage("Welcome back! Let's make today count! 💪"), 1000);
+            } else {
+                document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        // Start journey
+        function startJourney() {
+            const dateInput = document.getElementById('startDate');
+            if (!dateInput.value) {
+                alert('Please select a start date!');
+                return;
+            }
+            
+            state.startDate = dateInput.value;
+            state.currentDay = 1;
+            state.lastLoginDate = new Date().toDateString();
+            state.achievements.push('🌟 Journey Started!');
+            
+            saveState();
+            calculateCurrentDay();
+            
+            document.getElementById('onboarding').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('app').style.display = 'block';
+                updateUI();
+                showSparkyMessage("Let's build something amazing! 🚀");
+            }, 500);
+        }
+
+        // Calculate current day based on start date
+        function calculateCurrentDay() {
+            const start = new Date(state.startDate);
+            const today = new Date();
+            const diffTime = today - start;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays >= 0 && diffDays < 60) {
+                state.currentDay = diffDays + 1;
+            } else if (diffDays >= 60) {
+                state.currentDay = 60; // Completed!
+            }
+            
+            saveState();
+        }
+
+        // Update entire UI
+        function updateUI() {
+            updateHeader();
+            updateTodayView();
+            updateScheduleView();
+            updateProgressView();
+        }
+
+        // Update header
+        function updateHeader() {
+            document.getElementById('currentDay').textContent = state.currentDay;
+            
+            const startDate = new Date(state.startDate);
+            const currentDate = new Date(startDate);
+            currentDate.setDate(currentDate.getDate() + state.currentDay - 1);
+            document.getElementById('currentDate').textContent = currentDate.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric'
+            });
+            
+            const progress = (state.currentDay / 60) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            
+            const completed = Object.values(state.completedTasks).filter(Boolean).length;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('streakCount').textContent = state.streak;
+        }
+
+        // Update today view
+        function updateTodayView() {
+            const dayData = schedule[state.currentDay];
+            if (!dayData) return;
+            
+            document.getElementById('todayTitle').textContent = dayData.date;
+            document.getElementById('todayGoal').textContent = dayData.combinedGoal;
+            document.getElementById('todayMilestone').textContent = dayData.milestone;
+            document.getElementById('todayEmoji').textContent = dayData.emoji || '🎯';
+            
+            const totalTasks = dayData.shivamTasks.length + dayData.nurulTasks.length;
+            document.getElementById('todayTaskCount').textContent = totalTasks + ' tasks';
+            
+            const container = document.getElementById('todayTasksContainer');
+            container.innerHTML = renderPersonTasks('Shivam', 'AI Master', 'shivam', dayData.shivamTasks) +
+                                  renderPersonTasks('Nurul', 'Hardware Wizard', 'nurul', dayData.nurulTasks);
+        }
+
+        // Render person tasks
+        function renderPersonTasks(name, role, person, tasks) {
+            const completed = tasks.filter((_, idx) => isTaskCompleted(state.currentDay, person, idx)).length;
+            
+            return `
+                <div class="person-container">
+                    <div class="person-header">
+                        <div class="person-avatar ${person}">
+                            ${person === 'shivam' ? '👨‍💻' : '⚡'}
+                        </div>
+                        <div class="person-info">
+                            <h3>${name}</h3>
+                            <p>${role}</p>
+                        </div>
+                        <div class="person-progress">
+                            <div class="person-progress-value">${completed}/${tasks.length}</div>
+                            <div class="person-progress-label">completed</div>
+                        </div>
+                    </div>
+                    <div class="task-list">
+                        ${tasks.map((task, idx) => renderTask(task, state.currentDay, person, idx)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render individual task
+        function renderTask(task, day, person, idx) {
+            const isCompleted = isTaskCompleted(day, person, idx);
+            const isLink = task.resource.startsWith('http');
+            
+            return `
+                <div class="task-card ${isCompleted ? 'completed' : ''}" onclick="toggleTask(${day}, '${person}', ${idx})">
+                    <div class="task-main">
+                        <div class="checkbox"></div>
+                        <div class="task-content">
+                            <div class="task-time">🕐 ${task.time}</div>
+                            <div class="task-title">${task.task}</div>
+                            <div class="task-description">${task.description}</div>
+                        </div>
+                    </div>
+                    ${isLink ? 
+                        `<a href="${task.resource}" target="_blank" class="task-link" onclick="event.stopPropagation()">
+                            📺 Watch Tutorial →
+                        </a>` :
+                        `<div class="task-resource">💡 ${task.resource}</div>`
+                    }
+                </div>
+            `;
+        }
+
+        // Check if task completed
+        function isTaskCompleted(day, person, idx) {
+            const key = `${day}-${person}-${idx}`;
+            return state.completedTasks[key] || false;
+        }
+
+        // Toggle task completion
+        function toggleTask(day, person, idx) {
+            const key = `${day}-${person}-${idx}`;
+            state.completedTasks[key] = !state.completedTasks[key];
+            
+            if (state.completedTasks[key]) {
+                createConfetti();
+                checkDayCompletion(day);
+            }
+            
+            saveState();
+            updateUI();
+        }
+
+        // Check if day completed
+        function checkDayCompletion(day) {
+            const dayData = schedule[day];
+            if (!dayData) return;
+            
+            const totalTasks = dayData.shivamTasks.length + dayData.nurulTasks.length;
+            let completed = 0;
+            
+            dayData.shivamTasks.forEach((_, idx) => {
+                if (isTaskCompleted(day, 'shivam', idx)) completed++;
+            });
+            dayData.nurulTasks.forEach((_, idx) => {
+                if (isTaskCompleted(day, 'nurul', idx)) completed++;
+            });
+            
+            if (completed === totalTasks) {
+                const achievement = `✅ Day ${day} Complete`;
+                if (!state.achievements.includes(achievement)) {
+                    state.achievements.push(achievement);
+                    createMassiveConfetti();
+                    showSparkyMessage('🎉 Day complete! Amazing work!');
+                    
+                    if (day % 7 === 0) {
+                        state.achievements.push(`🏆 Week ${day/7} Complete!`);
+                    }
+                }
+            }
+        }
+
+        // Update schedule view
+        function updateScheduleView() {
+            const container = document.getElementById('scheduleContainer');
+            container.innerHTML = Object.keys(schedule).map(day => {
+                const dayData = schedule[day];
+                const isToday = parseInt(day) === state.currentDay;
+                const dayNum = parseInt(day);
+                
+                return `
+                    <div class="person-container" style="margin-bottom: 1rem;">
+                        <div class="person-header" style="cursor: pointer; ${isToday ? 'border-color: var(--primary); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);' : ''}" onclick="showDayDetails(${day})">
+                            <div class="person-avatar" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
+                                ${day}
+                            </div>
+                            <div class="person-info">
+                                <h3>${dayData.date}</h3>
+                                <p>${dayData.combinedGoal}</p>
+                            </div>
+                            ${isToday ? '<div style="color: var(--primary); font-weight: 700;">📍 Today</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update progress view
+        function updateProgressView() {
+            const container = document.getElementById('progressContainer');
+            
+            if (state.achievements.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🏆</div>
+                        <h3>No Achievements Yet</h3>
+                        <p>Complete your first task to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = `
+                <div style="display: grid; gap: 1rem;">
+                    ${state.achievements.map(achievement => `
+                        <div class="person-header" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05)); border-color: var(--success);">
+                            <div style="font-size: 1.25rem; font-weight: 700; text-align: center; width: 100%;">
+                                ${achievement}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.getElementById('progressBadge').textContent = state.achievements.length;
+            document.getElementById('progressBadge').style.display = 'block';
+        }
+
+        // Show day details in modal
+        function showDayDetails(day) {
+            const dayData = schedule[day];
+            if (!dayData) return;
+            
+            document.getElementById('modalTitle').textContent = dayData.date;
+            document.getElementById('modalBody').innerHTML = `
+                <div style="text-align: center; margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 1rem;">
+                    <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">${dayData.combinedGoal}</h3>
+                    <p style="opacity: 0.9;">${dayData.milestone}</p>
+                </div>
+                ${renderPersonTasks('Shivam', 'AI Master', 'shivam', dayData.shivamTasks)}
+                ${renderPersonTasks('Nurul', 'Hardware Wizard', 'nurul', dayData.nurulTasks)}
+                ${parseInt(day) !== state.currentDay ? 
+                    `<button class="btn" onclick="jumpToDay(${day})">Jump to Day ${day}</button>` :
+                    `<button class="btn success">This is Today ✓</button>`
+                }
+            `;
+            
+            document.getElementById('modal').classList.add('active');
+        }
+
+        // Jump to specific day
+        function jumpToDay(day) {
+            state.currentDay = parseInt(day);
+            saveState();
+            updateUI();
+            closeModal();
+            switchView('today');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Switch view
+        function switchView(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(view + 'View').classList.add('active');
+            document.querySelector(`.nav-item[data-view="${view}"]`).classList.add('active');
+        }
+
+        // Show help guide
+        function showHelp() {
+            document.getElementById('modalTitle').textContent = '❓ How to Use';
+            document.getElementById('modalBody').innerHTML = `
+                <div style="font-size: 0.95rem; line-height: 1.8; color: var(--text-dim);">
+                    <h3 style="color: var(--text); margin-bottom: 1rem; font-size: 1.125rem;">📱 Navigation</h3>
+                    <p style="margin-bottom: 1.5rem;"><strong>Today Tab:</strong> See your current day's tasks<br>
+                    <strong>Schedule Tab:</strong> Browse all 60 days<br>
+                    <strong>Progress Tab:</strong> View your achievements</p>
+                    
+                    <h3 style="color: var(--text); margin-bottom: 1rem; font-size: 1.125rem;">✅ Completing Tasks</h3>
+                    <p style="margin-bottom: 1.5rem;">Tap any task card to mark it complete. When all tasks for a day are done, you'll see a celebration!</p>
+                    
+                    <h3 style="color: var(--text); margin-bottom: 1rem; font-size: 1.125rem;">🤖 Sparky (Your Companion)</h3>
+                    <p style="margin-bottom: 1.5rem;">Click the floating robot for motivation and encouragement!</p>
+                    
+                    <h3 style="color: var(--text); margin-bottom: 1rem; font-size: 1.125rem;">📅 Auto Day Progression</h3>
+                    <p>Your day automatically updates based on your start date. The app always shows you what you should be working on TODAY!</p>
+                </div>
+                <button class="btn" onclick="closeModal()">Got it! 👍</button>
+            `;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        // Sparky interaction
+        function interactWithSparky() {
+            const messages = [
+                "You're crushing it! 💪",
+                "Every task brings you closer! 🚀",
+                "32 & 36? Perfect age to build! 🏗️",
+                "This will change your life! ✨",
+                "Keep that momentum going! 🔥",
+                "I believe in you both! 💖",
+                "Rome wasn't built in a day... but your smart home will be in 60! 🏛️"
+            ];
+            showSparkyMessage(messages[Math.floor(Math.random() * messages.length)]);
+        }
+
+        // Show Sparky message
+        function showSparkyMessage(msg) {
+            const message = document.getElementById('sparkyMessage');
+            message.textContent = msg;
+            message.classList.add('show');
+            setTimeout(() => message.classList.remove('show'), 3500);
+        }
+
+        // Confetti
+        function createConfetti() {
+            const colors = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6'];
+            for (let i = 0; i < 25; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.3 + 's';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function createMassiveConfetti() {
+            for (let i = 0; i < 60; i++) {
+                setTimeout(() => createConfetti(), i * 40);
+            }
+        }
+
+        // Save state
+        function saveState() {
+            localStorage.setItem('smartHomeJourney', JSON.stringify(state));
+        }
+
+        // Load state
+        function loadState() {
+            const saved = localStorage.getItem('smartHomeJourney');
+            if (saved) {
+                state = JSON.parse(saved);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // Auto-save every 30 seconds
+        setInterval(saveState, 30000);
+    </script>
+</body>
+</html>
