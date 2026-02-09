@@ -11,13 +11,16 @@ title Complete User Journey - From Visitor to Published Author
 start
 
 :Visit Homepage;
-note right: User lands on platform
+note right
+User lands on platform
+end note
 
 :Browse Featured Blogs;
 
 if (Want to write a blog?) then (yes)
-  
+
   if (Already have account?) then (yes)
+  
     #LightCyan:Go to Login Page;
     :Enter Email & Password;
     
@@ -29,24 +32,28 @@ if (Want to write a blog?) then (yes)
     endif
     
   else (no)
+  
     #LightYellow:Go to Registration Page;
-    :Fill Registration Form|
+    
+    :Fill Registration Form;
+    note right
     - Username
     - Email
     - Password
-    - Full Name;
+    - Full Name
+    end note
     
     :Submit Registration;
     
     if (Data valid?) then (yes)
+    
       #LightGreen:Create Account;
       :Send Verification Email;
-      
       :User Checks Email;
       :Click Verification Link;
       
       if (Token valid?) then (yes)
-        #LightGreen:Account Verified ✓;
+        #LightGreen:Account Verified;
         :Redirect to Login;
         :Enter Credentials;
         #LightGreen:Login Successful;
@@ -59,43 +66,47 @@ if (Want to write a blog?) then (yes)
       #Pink:Show Validation Errors;
       stop
     endif
+    
   endif
   
-  #LightBlue:=== USER DASHBOARD ===;
+  #LightBlue:USER DASHBOARD;
   
-  :View Dashboard Stats|
+  :View Dashboard Stats;
+  note right
   - Total Blogs
   - Total Views
-  - Draft Count;
+  - Draft Count
+  end note
   
   :Click "Create New Blog";
   
-  #LightGreen:=== BLOG EDITOR ===;
+  #LightGreen:BLOG EDITOR;
   
-  :Fill Blog Form|
-  ━━━━━━━━━━━━━━━━
-  📝 Title
-  🖼️ Featured Image
-  📁 Category
-  🏷️ Tags
-  ✍️ Content (Rich Editor)
-  🔍 SEO Settings;
+  :Fill Blog Form;
+  note right
+  - Title
+  - Featured Image
+  - Category
+  - Tags
+  - Content (Rich Editor)
+  - SEO Settings
+  end note
   
   if (Ready to publish?) then (yes)
+  
     :Click "Publish" Button;
     
     if (Form validation passed?) then (yes)
-      #LightGreen:Blog Published ✓;
+      #LightGreen:Blog Published;
       :Show Success Message;
-      
       :Blog appears on homepage;
       
       if (View published blog?) then (yes)
         :Navigate to Blog Page;
         :Display Blog Content;
         note right
-          Blog is now visible
-          to all visitors
+        Blog is now visible
+        to all visitors
         end note
       else (no)
         :Return to Dashboard;
@@ -103,28 +114,30 @@ if (Want to write a blog?) then (yes)
       
     else (no)
       #Pink:Show Validation Errors;
-      :Fix form errors;
-      backward:Fill Blog Form;
+      :Fix Form Errors;
+      :Fill Blog Form;
     endif
     
-  else (no - Save as draft)
+  else (Save as draft)
+  
     #LightYellow:Click "Save Draft";
     :Save to Drafts;
     :Return to Dashboard;
     note right
-      User can edit
-      draft later
+    User can edit draft later
     end note
+    
   endif
   
-else (no - Just browsing)
+else (Just browsing)
   :Browse Blogs;
   :Click on Blog Post;
   :Read Blog Content;
   :View Comments;
   :Share on Social Media;
+
 endif
 
 stop
 
-@enduml
+@enduml 
