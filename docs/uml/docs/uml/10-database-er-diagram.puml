@@ -1,0 +1,292 @@
+@startuml Database ER Diagram
+
+skinparam backgroundColor #FEFEFE
+skinparam classBorderColor #667eea
+skinparam classBackgroundColor #f8f9ff
+
+title Blog Platform - Entity Relationship Diagram
+
+entity "users" as user {
+  **Primary Key**
+  --
+  * _id : ObjectId <<PK>>
+  ==
+  **User Information**
+  --
+  * username : String <<UNIQUE>>
+  * email : String <<UNIQUE>>
+  * password : String
+  * fullName : String
+  * role : Enum('visitor','user','admin')
+  * avatar : String
+  * bio : Text
+  ==
+  **Social Links**
+  --
+  socialLinks.twitter : String
+  socialLinks.linkedin : String
+  socialLinks.github : String
+  ==
+  **Verification**
+  --
+  * isVerified : Boolean
+  * isActive : Boolean
+  verificationToken : String
+  verificationTokenExpires : Date
+  ==
+  **Security**
+  --
+  passwordResetToken : String
+  passwordResetExpires : Date
+  lastLogin : Date
+  loginAttempts : Number
+  lockUntil : Date
+  ==
+  **Timestamps**
+  --
+  * createdAt : Date
+  * updatedAt : Date
+}
+
+entity "blogs" as blog {
+  **Primary Key**
+  --
+  * _id : ObjectId <<PK>>
+  ==
+  **Foreign Keys**
+  --
+  * author_id : ObjectId <<FK>>
+  * category_id : ObjectId <<FK>>
+  ==
+  **Content**
+  --
+  * title : String
+  * slug : String <<UNIQUE>>
+  * content : Text
+  excerpt : String
+  ==
+  **Media**
+  --
+  featuredImage.url : String
+  featuredImage.publicId : String
+  ==
+  **Classification**
+  --
+  tags : Array<String>
+  * status : Enum('draft','published','archived')
+  ==
+  **Metrics**
+  --
+  viewCount : Number
+  likeCount : Number
+  commentCount : Number
+  readTime : Number
+  ==
+  **SEO**
+  --
+  seo.metaTitle : String
+  seo.metaDescription : String
+  seo.keywords : Array<String>
+  ==
+  **Features**
+  --
+  isFeatured : Boolean
+  publishedAt : Date
+  scheduledPublishDate : Date
+  ==
+  **Timestamps**
+  --
+  * createdAt : Date
+  * updatedAt : Date
+}
+
+entity "categories" as category {
+  **Primary Key**
+  --
+  * _id : ObjectId <<PK>>
+  ==
+  **Category Info**
+  --
+  * name : String <<UNIQUE>>
+  * slug : String <<UNIQUE>>
+  description : Text
+  ==
+  **Display**
+  --
+  icon : String
+  color : String
+  ==
+  **Status**
+  --
+  * isActive : Boolean
+  blogCount : Number
+  ==
+  **Timestamps**
+  --
+  * createdAt : Date
+  * updatedAt : Date
+}
+
+entity "comments" as comment {
+  **Primary Key**
+  --
+  * _id : ObjectId <<PK>>
+  ==
+  **Foreign Keys**
+  --
+  * blog_id : ObjectId <<FK>>
+  * author_id : ObjectId <<FK>>
+  parentComment_id : ObjectId <<FK>>
+  ==
+  **Content**
+  --
+  * content : Text
+  ==
+  **Moderation**
+  --
+  * isApproved : Boolean
+  isEdited : Boolean
+  editedAt : Date
+  ==
+  **Timestamps**
+  --
+  * createdAt : Date
+  * updatedAt : Date
+}
+
+entity "likes" as like {
+  **Composite Key**
+  --
+  * blog_id : ObjectId <<FK>>
+  * user_id : ObjectId <<FK>>
+  ==
+  **Timestamp**
+  --
+  * createdAt : Date
+}
+
+entity "analytics" as analytics {
+  **Primary Key**
+  --
+  * _id : ObjectId <<PK>>
+  ==
+  **Foreign Key**
+  --
+  * blog_id : ObjectId <<FK>>
+  ==
+  **Metrics**
+  --
+  * date : Date
+  views : Number
+  uniqueViews : Number
+  likes : Number
+  comments : Number
+  shares : Number
+  ==
+  **Engagement**
+  --
+  averageReadTime : Number
+  bounceRate : Number
+  ==
+  **Traffic Sources**
+  --
+  sources.direct : Number
+  sources.social : Number
+  sources.search : Number
+  sources.referral : Number
+  ==
+  **Timestamps**
+  --
+  * createdAt : Date
+  * updatedAt : Date
+}
+
+entity "sessions" as session {
+  **Primary Key**
+  --
+  * _id : ObjectId <<PK>>
+  ==
+  **Foreign Key**
+  --
+  * user_id : ObjectId <<FK>>
+  ==
+  **Session Data**
+  --
+  * token : String <<UNIQUE>>
+  ipAddress : String
+  userAgent : String
+  * isActive : Boolean
+  * expiresAt : Date
+  ==
+  **Timestamp**
+  --
+  * createdAt : Date
+}
+
+' Relationships with cardinality
+
+user ||--o{ blog : "writes"
+user ||--o{ comment : "posts"
+user ||--o{ like : "gives"
+user ||--o{ session : "has"
+
+blog ||--o{ comment : "has"
+blog ||--o{ like : "receives"
+blog }o--|| category : "belongs to"
+blog ||--o{ analytics : "tracked by"
+
+comment ||--o{ comment : "replies to"
+
+' Indexes notation
+
+note right of user
+  **Indexes:**
+  - username (unique)
+  - email (unique)
+  - role
+  - isActive
+  - createdAt
+end note
+
+note right of blog
+  **Indexes:**
+  - slug (unique)
+  - author_id
+  - category_id
+  - status
+  - publishedAt
+  - title (text)
+  - content (text)
+  - isFeatured
+  
+  **Compound Indexes:**
+  - {status: 1, publishedAt: -1}
+  - {author_id: 1, status: 1}
+end note
+
+note right of category
+  **Indexes:**
+  - name (unique)
+  - slug (unique)
+  - isActive
+end note
+
+note right of comment
+  **Indexes:**
+  - blog_id
+  - author_id
+  - parentComment_id
+  - isApproved
+  - createdAt
+end note
+
+note right of analytics
+  **Indexes:**
+  - blog_id
+  - date
+  
+  **Compound Index:**
+  - {blog_id: 1, date: -1}
+end note
+
+@enduml

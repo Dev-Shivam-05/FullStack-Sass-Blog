@@ -1,0 +1,118 @@
+@startuml Admin Blog Moderation
+
+skinparam backgroundColor #FEFEFE
+skinparam activityBorderColor #667eea
+skinparam activityBackgroundColor #f8f9ff
+
+title Admin Blog Moderation Flow
+
+|Admin|
+start
+
+:Login to Admin Panel;
+note right: Admin credentials required
+
+:View Admin Dashboard;
+
+:Click "Manage Blogs";
+
+|System|
+:Fetch all blogs from database;
+:Apply filters (status, date, author);
+:Sort by creation date;
+
+:Display blogs in table|
+- ID
+- Title  
+- Author
+- Status
+- Date
+- Actions;
+
+|Admin|
+:Select blog to review;
+
+|System|
+:Load complete blog data|
+- Full content
+- Images
+- Metadata
+- Author info
+- Analytics;
+
+:Display blog preview;
+
+|Admin|
+:Review blog content;
+
+if (Meets content guidelines?) then (✓ YES)
+  
+  #LightGreen:Click "Approve" button;
+  
+  |System|
+  :Update blog status to "published";
+  :Set publishedAt timestamp;
+  :Update category count;
+  :Generate SEO sitemap entry;
+  
+  :Send notification email to author|
+  Subject: "Blog Approved!"
+  Message: Congratulations message;
+  
+  :Log moderation action;
+  
+  :Blog appears on public site;
+  
+  |Admin|
+  :Success notification shown;
+  
+else (✗ NO - Violates guidelines)
+  
+  #Pink:Click "Reject" button;
+  
+  |Admin|
+  :Enter rejection reason|
+  - Inappropriate content
+  - Spam
+  - Plagiarism
+  - Quality issues
+  - Other (specify);
+  
+  :Submit rejection;
+  
+  |System|
+  :Update blog status to "rejected";
+  :Save rejection reason;
+  
+  :Send rejection email to author|
+  Subject: "Blog Rejected"
+  Message: Reason + guidelines;
+  
+  :Log moderation action;
+  
+  |Admin|
+  :Rejection confirmed;
+  
+  note right
+    Author can:
+    - Edit and resubmit
+    - Delete the blog
+    - Contact support
+  end note
+  
+endif
+
+if (More blogs pending review?) then (yes)
+  |Admin|
+  :Move to next blog;
+  |System|
+  :Load next blog data;
+  backward:Display blog preview;
+  
+else (no)
+  |Admin|
+  :Return to dashboard;
+  stop
+endif
+
+@enduml

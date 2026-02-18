@@ -1,0 +1,182 @@
+@startuml Blog Creation - Sequence Diagram
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceParticipantBorderColor #667eea
+skinparam sequenceParticipantBackgroundColor #f8f9ff
+skinparam sequenceLifeLineBorderColor #764ba2
+
+title Blog Creation Flow - Detailed Sequence
+
+actor "User" as U
+participant "Browser" as B
+participant "Frontend\n(EJS)" as F
+participant "Express\nServer" as S
+participant "Auth\nMiddleware" as Auth
+participant "Blog\nController" as BC
+participant "Upload\nMiddleware" as UM
+participant "Cloudinary" as Cloud
+participant "MongoDB" as DB
+
+== Navigation to Blog Editor ==
+
+U -> B: Click "Create New Blog"
+activate B
+
+B -> F: GET /dashboard/create-blog
+activate F
+
+F -> S: Request page
+activate S
+
+S -> Auth: Verify JWT Token
+activate Auth
+Auth -> Auth: Validate token
+Auth --> S: User authenticated ✓
+deactivate Auth
+
+S --> F: Return editor page
+deactivate S
+
+F --> B: Render blog editor form
+deactivate F
+
+B --> U: Display form
+deactivate B
+
+== Filling Blog Form ==
+
+U -> B: Fill blog details\n(Title, Content, etc.)
+activate B
+
+U -> B: Select featured image
+B --> U: Show image preview
+deactivate B
+
+== Image Upload ==
+
+U -> B: Upload image
+activate B
+
+B -> F: POST image file
+activate F
+
+F -> S: Upload request
+activate S
+
+S -> UM: Process file upload
+activate UM
+
+UM -> UM: Validate file\n(type, size)
+
+alt Valid image file
+  UM -> Cloud: Upload to Cloudinary
+  activate Cloud
+  Cloud -> Cloud: Process & store image
+  Cloud --> UM: Return image URL
+  deactivate Cloud
+  
+  UM --> S: Image uploaded ✓
+  deactivate UM
+  
+  S --> F: Return image URL
+  deactivate S
+  
+  F --> B: Update form with URL
+  deactivate F
+  
+  B --> U: Show uploaded image
+  deactivate B
+  
+else Invalid file
+  UM --> S: Validation error
+  S --> F: Error response
+  F --> B: Show error message
+  B --> U: Display error
+end
+
+== Publishing Blog ==
+
+U -> B: Click "Publish"
+activate B
+
+B -> F: POST /api/blogs/create
+activate F
+
+F -> S: Submit blog data
+activate S
+
+S -> Auth: Verify user session
+activate Auth
+Auth --> S: Authenticated ✓
+deactivate Auth
+
+S -> BC: createBlog(data)
+activate BC
+
+BC -> BC: Validate blog data
+BC -> BC: Generate slug
+BC -> BC: Calculate read time
+
+BC -> DB: INSERT blog document
+activate DB
+
+DB -> DB: Save blog
+DB -> DB: Create indexes
+
+DB --> BC: Blog created\n(ID: 12345)
+deactivate DB
+
+BC -> DB: UPDATE category count
+activate DB
+DB --> BC: Updated ✓
+deactivate DB
+
+BC --> S: Blog published successfully
+deactivate BC
+
+S --> F: Success response + blog data
+deactivate S
+
+F --> B: Render success page
+deactivate F
+
+B --> U: "Blog Published!" 🎉
+deactivate B
+
+== Viewing Published Blog ==
+
+U -> B: Click "View Blog"
+activate B
+
+B -> F: GET /blog/:slug
+activate F
+
+F -> S: Request blog
+activate S
+
+S -> BC: getBlogBySlug(slug)
+activate BC
+
+BC -> DB: Find blog by slug
+activate DB
+DB --> BC: Return blog data
+deactivate DB
+
+BC -> DB: Increment view count
+activate DB
+DB --> BC: Updated ✓
+deactivate DB
+
+BC --> S: Blog data with author
+deactivate BC
+
+S --> F: Return blog
+deactivate S
+
+F --> B: Render blog page
+deactivate F
+
+B --> U: Display published blog
+deactivate B
+
+@enduml

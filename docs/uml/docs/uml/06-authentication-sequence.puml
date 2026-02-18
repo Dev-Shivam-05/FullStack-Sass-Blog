@@ -1,0 +1,275 @@
+@startuml Authentication Flow - Detailed Sequence
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceParticipantBorderColor #667eea
+skinparam sequenceParticipantBackgroundColor #f8f9ff
+
+title Complete Authentication Flow - Registration & Login
+
+actor "User" as U
+participant "Browser" as B
+participant "Frontend" as F
+participant "Express\nRouter" as R
+participant "Validator\nMiddleware" as V
+participant "Auth\nController" as AC
+participant "User\nModel" as UM
+participant "MongoDB" as DB
+participant "Email\nService" as ES
+participant "JWT\nService" as JWT
+
+== REGISTRATION FLOW ==
+
+U -> B: Click "Sign Up"
+activate B
+B -> F: GET /register
+activate F
+F --> B: Registration form
+deactivate F
+B --> U: Display form
+deactivate B
+
+U -> B: Fill & submit form
+note right
+  - Username
+  - Email
+  - Password
+  - Full Name
+end note
+
+activate B
+B -> R: POST /api/auth/register
+activate R
+
+R -> V: Validate input
+activate V
+V -> V: Check username format
+V -> V: Validate email
+V -> V: Check password strength
+
+alt Validation fails
+  V --> R: Validation errors
+  R --> B: 400 Bad Request
+  B --> U: Show error messages
+else Validation passes
+  V --> R: Data valid ✓
+  deactivate V
+  
+  R -> AC: register(userData)
+  activate AC
+  
+  AC -> UM: Check if email exists
+  activate UM
+  UM -> DB: findOne({email})
+  activate DB
+  DB --> UM: Query result
+  deactivate DB
+  
+  alt Email already exists
+    UM --> AC: User exists
+    AC --> R: 409 Conflict
+    R --> B: Email already registered
+    B --> U: Show error
+  else Email available
+    UM --> AC: Email available ✓
+    deactivate UM
+    
+    AC -> AC: Hash password
+    note right: Using bcrypt with\nsalt rounds = 10
+    
+    AC -> AC: Generate verification token
+    
+    AC -> UM: Create new user
+    activate UM
+    UM -> DB: insertOne(userData)
+    activate DB
+    DB --> UM: User created
+    deactivate DB
+    UM --> AC: New user object
+    deactivate UM
+    
+    AC -> ES: Send verification email
+    activate ES
+    ES -> ES: Create email template
+    ES -> ES: Send via SMTP
+    ES --> AC: Email sent ✓
+    deactivate ES
+    
+    AC --> R: Registration successful
+    deactivate AC
+    
+    R --> B: 201 Created
+    deactivate R
+    
+    B --> U: "Check email to verify"
+    deactivate B
+  end
+end
+
+== EMAIL VERIFICATION ==
+
+U -> B: Click link in email
+activate B
+B -> R: GET /api/auth/verify/:token
+activate R
+
+R -> AC: verifyEmail(token)
+activate AC
+
+AC -> UM: Find user by token
+activate UM
+UM -> DB: findOne({verificationToken})
+activate DB
+DB --> UM: User data
+deactivate DB
+
+alt Token invalid/expired
+  UM --> AC: No user found
+  AC --> R: 400 Bad Request
+  R --> B: Invalid/expired token
+  B --> U: Show error
+else Token valid
+  UM --> AC: User found
+  deactivate UM
+  
+  AC -> UM: Update user
+  activate UM
+  UM -> DB: updateOne({isVerified: true})
+  activate DB
+  DB --> UM: Updated ✓
+  deactivate DB
+  UM --> AC: User verified
+  deactivate UM
+  
+  AC --> R: Verification successful
+  deactivate AC
+  
+  R --> B: Redirect to /login
+  deactivate R
+  
+  B --> U: "Account verified!"
+  deactivate B
+end
+
+== LOGIN FLOW ==
+
+U -> B: Click "Login"
+activate B
+B -> F: GET /login
+activate F
+F --> B: Login form
+deactivate F
+B --> U: Display form
+deactivate B
+
+U -> B: Enter credentials
+activate B
+B -> R: POST /api/auth/login
+activate R
+
+R -> V: Validate input
+activate V
+V -> V: Check email format
+V -> V: Check password present
+
+alt Validation fails
+  V --> R: Validation errors
+  R --> B: 400 Bad Request
+  B --> U: Show errors
+else Validation passes
+  V --> R: Data valid ✓
+  deactivate V
+  
+  R -> AC: login(credentials)
+  activate AC
+  
+  AC -> UM: Find user with password
+  activate UM
+  UM -> DB: findOne({email}).select('+password')
+  activate DB
+  DB --> UM: User data
+  deactivate DB
+  
+  alt User not found
+    UM --> AC: No user
+    AC --> R: 401 Unauthorized
+    R --> B: Invalid credentials
+    B --> U: Show error
+  else User found
+    UM --> AC: User object
+    deactivate UM
+    
+    AC -> AC: Check if account locked
+    
+    alt Account locked
+      AC --> R: 423 Locked
+      R --> B: Account temporarily locked
+      B --> U: Try again later
+    else Not locked
+      AC -> UM: Compare passwords
+      activate UM
+      UM -> UM: bcrypt.compare()
+      
+      alt Password incorrect
+        UM --> AC: Password mismatch
+        deactivate UM
+        
+        AC -> UM: Increment login attempts
+        activate UM
+        UM -> DB: updateOne({$inc: loginAttempts})
+        activate DB
+        DB --> UM: Updated
+        deactivate DB
+        deactivate UM
+        
+        AC --> R: 401 Unauthorized
+        R --> B: Invalid credentials
+        B --> U: Show error
+      else Password correct
+        UM --> AC: Password match ✓
+        deactivate UM
+        
+        AC -> AC: Check if verified
+        
+        alt Not verified
+          AC --> R: 403 Forbidden
+          R --> B: Email not verified
+          B --> U: Please verify email
+        else Verified
+          AC -> JWT: Generate token
+          activate JWT
+          JWT -> JWT: Sign JWT with user ID
+          JWT --> AC: Token generated
+          deactivate JWT
+          
+          AC -> UM: Update last login
+          activate UM
+          UM -> DB: updateOne({lastLogin: now})
+          activate DB
+          DB --> UM: Updated
+          deactivate DB
+          UM --> AC: Updated ✓
+          deactivate UM
+          
+          AC -> UM: Reset login attempts
+          activate UM
+          UM -> DB: updateOne({loginAttempts: 0})
+          activate DB
+          DB --> UM: Reset ✓
+          deactivate DB
+          deactivate UM
+          
+          AC --> R: Login successful + token
+          deactivate AC
+          
+          R --> B: Set cookie + redirect
+          deactivate R
+          
+          B --> U: Redirect to dashboard
+          deactivate B
+        end
+      end
+    end
+  end
+end
+
+@enduml

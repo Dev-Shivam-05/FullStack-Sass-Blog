@@ -1,0 +1,217 @@
+@startuml Blog Platform - Class Diagram
+
+skinparam backgroundColor #FEFEFE
+skinparam classBorderColor #667eea
+skinparam classBackgroundColor #f8f9ff
+skinparam classAttributeIconSize 0
+
+title Blog Platform - Complete Class Diagram
+
+class User {
+  - _id: ObjectId
+  - username: String
+  - email: String
+  - password: String (hashed)
+  - fullName: String
+  - role: Enum
+  - avatar: String
+  - bio: String
+  - socialLinks: Object
+  - isVerified: Boolean
+  - isActive: Boolean
+  - verificationToken: String
+  - passwordResetToken: String
+  - lastLogin: Date
+  - loginAttempts: Number
+  - lockUntil: Date
+  - createdAt: Date
+  - updatedAt: Date
+  __
+  + register(): Promise
+  + login(): Promise
+  + logout(): void
+  + verifyEmail(): Promise
+  + resetPassword(): Promise
+  + updateProfile(): Promise
+  + changePassword(): Promise
+  + comparePassword(): Boolean
+  + isLocked(): Boolean
+  + incLoginAttempts(): Promise
+}
+
+class Blog {
+  - _id: ObjectId
+  - title: String
+  - slug: String
+  - content: String
+  - excerpt: String
+  - featuredImage: Object
+  - author: ObjectId
+  - category: ObjectId
+  - tags: Array<String>
+  - status: Enum
+  - viewCount: Number
+  - likeCount: Number
+  - commentCount: Number
+  - readTime: Number
+  - seo: Object
+  - isFeatured: Boolean
+  - publishedAt: Date
+  - createdAt: Date
+  - updatedAt: Date
+  __
+  + create(): Promise
+  + update(): Promise
+  + delete(): Promise
+  + publish(): Promise
+  + saveDraft(): Promise
+  + archive(): Promise
+  + incrementViews(): Promise
+  + generateSlug(): String
+  + calculateReadTime(): Number
+}
+
+class Category {
+  - _id: ObjectId
+  - name: String
+  - slug: String
+  - description: String
+  - icon: String
+  - color: String
+  - isActive: Boolean
+  - blogCount: Number
+  - createdAt: Date
+  - updatedAt: Date
+  __
+  + create(): Promise
+  + update(): Promise
+  + delete(): Promise
+  + getBlogs(): Promise
+  + updateCount(): Promise
+}
+
+class Comment {
+  - _id: ObjectId
+  - blog: ObjectId
+  - author: ObjectId
+  - content: String
+  - parentComment: ObjectId
+  - isApproved: Boolean
+  - isEdited: Boolean
+  - editedAt: Date
+  - createdAt: Date
+  - updatedAt: Date
+  __
+  + create(): Promise
+  + update(): Promise
+  + delete(): Promise
+  + approve(): Promise
+  + reject(): Promise
+  + getReplies(): Promise
+}
+
+class Like {
+  - _id: ObjectId
+  - blog: ObjectId
+  - user: ObjectId
+  - createdAt: Date
+  __
+  + add(): Promise
+  + remove(): Promise
+  + toggle(): Promise
+}
+
+class Analytics {
+  - _id: ObjectId
+  - blog: ObjectId
+  - date: Date
+  - views: Number
+  - uniqueViews: Number
+  - likes: Number
+  - comments: Number
+  - shares: Number
+  - averageReadTime: Number
+  - bounceRate: Number
+  - sources: Object
+  - createdAt: Date
+  __
+  + track(): Promise
+  + getStats(): Promise
+  + getDailyStats(): Promise
+  + getMonthlyStats(): Promise
+}
+
+class Session {
+  - _id: ObjectId
+  - userId: ObjectId
+  - token: String
+  - ipAddress: String
+  - userAgent: String
+  - isActive: Boolean
+  - expiresAt: Date
+  - createdAt: Date
+  __
+  + create(): Promise
+  + invalidate(): Promise
+  + refresh(): Promise
+}
+
+' Relationships
+
+User "1" -- "0..*" Blog : writes >
+User "1" -- "0..*" Comment : posts >
+User "1" -- "0..*" Like : gives >
+User "1" -- "0..*" Session : has >
+
+Blog "1" -- "0..*" Comment : has >
+Blog "1" -- "0..*" Like : receives >
+Blog "0..*" -- "1" Category : belongs to >
+Blog "1" -- "0..*" Analytics : tracked by >
+
+Comment "1" -- "0..*" Comment : replies to >
+
+' Enumerations
+
+enum UserRole {
+  VISITOR
+  USER
+  ADMIN
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+User --> UserRole : has
+Blog --> BlogStatus : has
+
+note right of User
+  Handles user authentication,
+  authorization, and profile
+  management. Supports role-based
+  access control.
+end note
+
+note right of Blog
+  Central entity representing
+  blog posts. Includes SEO
+  optimization and analytics
+  tracking.
+end note
+
+note right of Category
+  Organizes blogs into
+  logical groups. Maintains
+  blog count for each category.
+end note
+
+note right of Analytics
+  Tracks detailed metrics
+  for each blog post including
+  views, engagement, and traffic
+  sources.
+end note
+
+@enduml

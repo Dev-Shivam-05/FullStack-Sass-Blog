@@ -1,0 +1,130 @@
+@startuml Deployment Architecture
+
+skinparam backgroundColor #FEFEFE
+skinparam nodeBorderColor #667eea
+skinparam nodeBackgroundColor #f8f9ff
+skinparam cloudBorderColor #764ba2
+skinparam cloudBackgroundColor #fff5f5
+
+title Blog Platform - Deployment Architecture
+
+node "User Devices" {
+  artifact "Web Browser" as Browser
+  artifact "Mobile Browser" as MobileBrowser
+}
+
+cloud "Content Delivery Network" {
+  artifact "Static Assets\n(CSS, JS, Images)" as CDN
+}
+
+node "Frontend Server\n(Vercel/Netlify)" {
+  component "React/EJS App" as Frontend
+  component "Static Files" as Static
+}
+
+node "Backend Server\n(AWS EC2 / Heroku / DigitalOcean)" {
+  component "Node.js Runtime" as NodeJS
+  component "Express Server" as Express
+  component "PM2 Process Manager" as PM2
+  
+  Express -- PM2
+}
+
+node "Database Server\n(MongoDB Atlas / AWS DocumentDB)" {
+  database "MongoDB\nPrimary Instance" as MongoDB_Primary
+  database "MongoDB\nReplica 1" as MongoDB_Replica1
+  database "MongoDB\nReplica 2" as MongoDB_Replica2
+  
+  MongoDB_Primary -- MongoDB_Replica1 : Replication
+  MongoDB_Primary -- MongoDB_Replica2 : Replication
+}
+
+cloud "File Storage\n(Cloudinary / AWS S3)" {
+  storage "User Uploads" as Uploads
+  storage "Blog Images" as Images
+  storage "Avatars" as Avatars
+}
+
+cloud "Email Service\n(SendGrid / AWS SES)" {
+  component "SMTP Server" as SMTP
+  component "Email Templates" as EmailTemplates
+}
+
+cloud "Monitoring & Logging" {
+  component "Application Logs\n(Winston)" as Logs
+  component "Error Tracking\n(Sentry)" as ErrorTracking
+  component "Performance\nMonitoring" as APM
+}
+
+node "Cache Layer\n(Redis)" {
+  storage "Session Store" as Sessions
+  storage "Cache Store" as Cache
+}
+
+node "Load Balancer\n(Nginx / AWS ALB)" {
+  component "Reverse Proxy" as Proxy
+  component "SSL Termination" as SSL
+}
+
+' Connections
+
+Browser -down-> CDN : "Load Assets\n(HTTPS)"
+MobileBrowser -down-> CDN : "Load Assets\n(HTTPS)"
+
+Browser -down-> Proxy : "HTTPS Requests"
+MobileBrowser -down-> Proxy : "HTTPS Requests"
+
+Proxy -down-> Frontend : "Route Static"
+Proxy -down-> Express : "Route API"
+
+Frontend -down-> Express : "REST API\n(HTTPS)"
+
+Express -down-> MongoDB_Primary : "Database\nQueries"
+Express -down-> Cache : "Cache\nRead/Write"
+Express -right-> Uploads : "Upload\nFiles"
+Express -right-> SMTP : "Send\nEmails"
+
+Express -down-> Logs : "Write Logs"
+Express -down-> ErrorTracking : "Track Errors"
+
+note right of Proxy
+  **Production Setup:**
+  - SSL/TLS Certificates
+  - Load Balancing
+  - DDoS Protection
+  - Request Routing
+end note
+
+note right of Express
+  **Server Configuration:**
+  - Environment: Node.js 18+
+  - Framework: Express.js
+  - Process Manager: PM2
+  - Clustering enabled
+end note
+
+note right of MongoDB_Primary
+  **Database Setup:**
+  - Replication enabled
+  - Automated backups
+  - Point-in-time recovery
+  - Connection pooling
+end note
+
+note right of Cache
+  **Caching Strategy:**
+  - Session management
+  - API response caching
+  - Rate limiting data
+  - TTL: 15 minutes
+end note
+
+note bottom of Uploads
+  **Storage Configuration:**
+  - CDN integration
+  - Image optimization
+  - Auto-format conversion
+  - Lazy loading
+end note
+
+@enduml

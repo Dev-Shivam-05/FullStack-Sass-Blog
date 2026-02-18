@@ -1,0 +1,171 @@
+@startuml System Component Architecture
+
+skinparam backgroundColor #FEFEFE
+skinparam componentBorderColor #667eea
+skinparam componentBackgroundColor #f8f9ff
+skinparam packageBorderColor #764ba2
+skinparam packageBackgroundColor #fff5f5
+
+title Blog Platform - Component Architecture
+
+package "Client Layer" #LightBlue {
+  
+  component [Web Browser] as Browser
+  
+  package "Frontend Assets" {
+    component [HTML Templates\n(EJS)] as Templates
+    component [CSS Stylesheets\n(Bootstrap)] as CSS
+    component [JavaScript\n(Vanilla JS)] as JS
+    component [Rich Text Editor\n(TinyMCE)] as Editor
+  }
+  
+  Browser --> Templates
+  Browser --> CSS
+  Browser --> JS
+  Browser --> Editor
+}
+
+package "Application Layer" #LightGreen {
+  
+  component [Express Server] as Express
+  
+  package "Routes" {
+    component [Auth Routes] as AuthRoutes
+    component [Blog Routes] as BlogRoutes
+    component [User Routes] as UserRoutes
+    component [Admin Routes] as AdminRoutes
+    component [Public Routes] as PublicRoutes
+  }
+  
+  package "Middleware" {
+    component [Authentication\nMiddleware] as AuthMW
+    component [Authorization\nMiddleware] as AuthzMW
+    component [Validation\nMiddleware] as ValidMW
+    component [Upload\nMiddleware] as UploadMW
+    component [Error Handler] as ErrorMW
+    component [Rate Limiter] as RateMW
+  }
+  
+  package "Controllers" {
+    component [Auth Controller] as AuthCtrl
+    component [Blog Controller] as BlogCtrl
+    component [User Controller] as UserCtrl
+    component [Admin Controller] as AdminCtrl
+    component [Comment Controller] as CommentCtrl
+  }
+  
+  Express --> AuthRoutes
+  Express --> BlogRoutes
+  Express --> UserRoutes
+  Express --> AdminRoutes
+  Express --> PublicRoutes
+  
+  AuthRoutes --> AuthMW
+  BlogRoutes --> AuthMW
+  UserRoutes --> AuthMW
+  AdminRoutes --> AuthzMW
+  
+  AuthRoutes --> ValidMW
+  BlogRoutes --> ValidMW
+  BlogRoutes --> UploadMW
+  
+  AuthRoutes --> AuthCtrl
+  BlogRoutes --> BlogCtrl
+  UserRoutes --> UserCtrl
+  AdminRoutes --> AdminCtrl
+  BlogRoutes --> CommentCtrl
+}
+
+package "Business Logic Layer" #LightYellow {
+  
+  package "Services" {
+    component [Auth Service] as AuthSvc
+    component [Blog Service] as BlogSvc
+    component [Email Service] as EmailSvc
+    component [Upload Service] as UploadSvc
+    component [Analytics Service] as AnalyticsSvc
+  }
+  
+  package "Utilities" {
+    component [JWT Generator] as JWTUtil
+    component [Password Hasher] as HashUtil
+    component [Slug Generator] as SlugUtil
+    component [Email Templates] as EmailTpl
+  }
+  
+  AuthCtrl --> AuthSvc
+  BlogCtrl --> BlogSvc
+  AdminCtrl --> AnalyticsSvc
+  
+  AuthSvc --> JWTUtil
+  AuthSvc --> HashUtil
+  AuthSvc --> EmailSvc
+  
+  BlogSvc --> SlugUtil
+  BlogSvc --> UploadSvc
+  
+  EmailSvc --> EmailTpl
+}
+
+package "Data Access Layer" #Pink {
+  
+  package "Models (Mongoose)" {
+    component [User Model] as UserModel
+    component [Blog Model] as BlogModel
+    component [Category Model] as CategoryModel
+    component [Comment Model] as CommentModel
+    component [Analytics Model] as AnalyticsModel
+  }
+  
+  AuthSvc --> UserModel
+  BlogSvc --> BlogModel
+  BlogSvc --> CategoryModel
+  BlogSvc --> CommentModel
+  AnalyticsSvc --> AnalyticsModel
+}
+
+package "External Services" #LightCyan {
+  database "MongoDB\nDatabase" as MongoDB {
+    storage "Users Collection"
+    storage "Blogs Collection"
+    storage "Categories Collection"
+    storage "Comments Collection"
+    storage "Analytics Collection"
+  }
+  
+  cloud "Cloudinary\nImage Storage" as Cloudinary
+  cloud "SMTP Server\n(Email)" as SMTP
+}
+
+UserModel --> MongoDB
+BlogModel --> MongoDB
+CategoryModel --> MongoDB
+CommentModel --> MongoDB
+AnalyticsModel --> MongoDB
+
+UploadSvc --> Cloudinary
+EmailSvc --> SMTP
+
+Browser -down-> Express : HTTP/HTTPS
+Express -up-> Browser : HTML/JSON
+
+note right of AuthMW
+  Verifies JWT tokens
+  Authenticates users
+  Manages sessions
+end note
+
+note right of UploadSvc
+  Handles image uploads
+  Integrates with Cloudinary
+  Validates file types
+end note
+
+note right of MongoDB
+  Primary data store
+  Stores all user data,
+  blogs, comments, and
+  analytics
+end note
+
+@enduml

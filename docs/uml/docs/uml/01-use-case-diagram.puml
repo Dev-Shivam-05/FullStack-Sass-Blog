@@ -1,0 +1,129 @@
+@startuml Blog Platform - Use Case Diagram
+!define RECTANGLE class
+
+skinparam actorStyle awesome
+skinparam backgroundColor #FEFEFE
+skinparam actorBorderColor #667eea
+skinparam actorBackgroundColor #f8f9ff
+skinparam usecaseBorderColor #667eea
+skinparam usecaseBackgroundColor #ffffff
+
+left to right direction
+
+actor "Visitor" as V #lightblue
+actor "Registered\nUser" as U #lightgreen
+actor "Administrator" as A #pink
+
+rectangle "Blog Platform System" #line.dashed {
+  
+  package "Public Access" #LightYellow {
+    usecase "View Homepage" as UC1
+    usecase "Browse All Blogs" as UC2
+    usecase "Read Blog Post" as UC3
+    usecase "Search Blogs" as UC4
+    usecase "Filter by Category" as UC5
+    usecase "View Blog Comments" as UC6
+  }
+  
+  package "Authentication" #LightCyan {
+    usecase "Register Account" as UC7
+    usecase "Login" as UC8
+    usecase "Logout" as UC9
+    usecase "Verify Email" as UC10
+    usecase "Reset Password" as UC11
+  }
+  
+  package "User Features" #LightGreen {
+    usecase "View Dashboard" as UC12
+    usecase "Create Blog Post" as UC13
+    usecase "Edit Own Blog" as UC14
+    usecase "Delete Own Blog" as UC15
+    usecase "Save as Draft" as UC16
+    usecase "Publish Blog" as UC17
+    usecase "Upload Images" as UC18
+    usecase "Manage Profile" as UC19
+    usecase "Post Comments" as UC20
+    usecase "Like Blog Posts" as UC21
+    usecase "View My Analytics" as UC22
+  }
+  
+  package "Admin Features" #Pink {
+    usecase "Admin Dashboard" as UC23
+    usecase "Manage All Blogs" as UC24
+    usecase "Approve/Reject Blogs" as UC25
+    usecase "Delete Any Blog" as UC26
+    usecase "Manage Users" as UC27
+    usecase "Ban/Unban Users" as UC28
+    usecase "Manage Categories" as UC29
+    usecase "View System Analytics" as UC30
+    usecase "Moderate Comments" as UC31
+    usecase "Feature Blogs" as UC32
+  }
+}
+
+' Visitor connections
+V --> UC1
+V --> UC2
+V --> UC3
+V --> UC4
+V --> UC5
+V --> UC6
+V --> UC7
+V --> UC8
+
+' User connections (inherits Visitor)
+U --|> V
+U --> UC9
+U --> UC10
+U --> UC12
+U --> UC13
+U --> UC14
+U --> UC15
+U --> UC16
+U --> UC17
+U --> UC18
+U --> UC19
+U --> UC20
+U --> UC21
+U --> UC22
+
+' Admin connections (inherits User)
+A --|> U
+A --> UC23
+A --> UC24
+A --> UC25
+A --> UC26
+A --> UC27
+A --> UC28
+A --> UC29
+A --> UC30
+A --> UC31
+A --> UC32
+
+' Include relationships
+UC13 ..> UC16 : <<include>>
+UC13 ..> UC17 : <<include>>
+UC13 ..> UC18 : <<include>>
+
+UC14 ..> UC16 : <<include>>
+UC14 ..> UC17 : <<include>>
+
+note right of UC7
+  Email verification
+  required after
+  registration
+end note
+
+note right of UC13
+  Users can create,
+  save drafts, and
+  publish blogs
+end note
+
+note right of UC24
+  Admins have full
+  control over all
+  platform content
+end note
+
+@enduml

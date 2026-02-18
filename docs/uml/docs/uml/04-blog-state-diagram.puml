@@ -1,0 +1,128 @@
+@startuml Blog Post Lifecycle - State Diagram
+
+skinparam backgroundColor #FEFEFE
+skinparam stateBorderColor #667eea
+skinparam stateBackgroundColor #f8f9ff
+
+title Blog Post Lifecycle - State Diagram
+
+[*] --> Creating : User clicks\n"Create Blog"
+
+state Creating {
+  [*] --> FillingForm
+  FillingForm : User enters title
+  FillingForm : User writes content
+  FillingForm : User uploads image
+  FillingForm : User selects category
+  FillingForm --> Validating : Click save/publish
+  
+  Validating : Validate required fields
+  Validating : Check content length
+  Validating : Verify image format
+  
+  Validating --> FillingForm : Validation failed
+}
+
+Creating --> Draft : Save as Draft
+Creating --> Published : Publish directly
+Creating --> [*] : Cancel/Close
+
+state Draft {
+  [*] --> Saved
+  Saved : Blog saved in database
+  Saved : Status = "draft"
+  Saved : Not visible to public
+  Saved : Editable by author
+}
+
+Draft --> Creating : Continue editing
+Draft --> Published : Publish blog
+Draft --> Deleted : Delete draft
+
+state Published {
+  [*] --> Live
+  Live : Visible to all users
+  Live : Appears on homepage
+  Live : Can receive comments
+  Live : Analytics tracked
+  Live : SEO indexed
+  
+  Live --> BeingViewed : User visits
+  
+  state BeingViewed {
+    [*] --> IncrementViews
+    IncrementViews --> TrackAnalytics
+    TrackAnalytics --> [*]
+  }
+}
+
+Published --> Editing : Author edits
+Published --> Archived : Archive blog
+Published --> Deleted : Delete blog
+
+state Editing {
+  [*] --> ModifyingContent
+  ModifyingContent : Update title/content
+  ModifyingContent : Change image
+  ModifyingContent : Edit metadata
+  ModifyingContent --> SavingChanges
+  SavingChanges --> [*]
+}
+
+Editing --> Published : Save changes
+
+state Archived {
+  [*] --> Hidden
+  Hidden : Not visible publicly
+  Hidden : Preserved in database
+  Hidden : Can be restored
+  Hidden : Analytics retained
+}
+
+Archived --> Published : Restore blog
+Archived --> Deleted : Permanent delete
+
+state Deleted {
+  [*] --> SoftDeleted
+  SoftDeleted : Marked as deleted
+  SoftDeleted : 30-day recovery period
+  SoftDeleted --> PermanentlyDeleted : After 30 days
+  PermanentlyDeleted : Removed from database
+  PermanentlyDeleted : Images deleted
+  PermanentlyDeleted : Cannot be recovered
+}
+
+Deleted --> [*]
+
+note right of Creating
+  Initial state when
+  user starts creating
+  a new blog post
+end note
+
+note right of Draft
+  Temporary state
+  for unfinished
+  blog posts
+end note
+
+note right of Published
+  Main state where
+  blog is live and
+  accessible to all
+end note
+
+note right of Archived
+  Blog is hidden but
+  can be restored
+  by author or admin
+end note
+
+note right of Deleted
+  Final state with
+  optional recovery
+  period before
+  permanent deletion
+end note
+
+@enduml

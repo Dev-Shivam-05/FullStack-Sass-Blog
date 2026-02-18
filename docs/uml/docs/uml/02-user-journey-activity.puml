@@ -1,0 +1,130 @@
+@startuml Complete User Journey - Activity Diagram
+
+skinparam backgroundColor #FEFEFE
+skinparam activityBorderColor #667eea
+skinparam activityBackgroundColor #f8f9ff
+skinparam activityDiamondBorderColor #764ba2
+skinparam activityDiamondBackgroundColor #ffd6e8
+
+title Complete User Journey - From Visitor to Published Author
+
+start
+
+:Visit Homepage;
+note right: User lands on platform
+
+:Browse Featured Blogs;
+
+if (Want to write a blog?) then (yes)
+  
+  if (Already have account?) then (yes)
+    #LightCyan:Go to Login Page;
+    :Enter Email & Password;
+    
+    if (Credentials valid?) then (yes)
+      #LightGreen:Login Successful;
+    else (no)
+      #Pink:Show Error Message;
+      stop
+    endif
+    
+  else (no)
+    #LightYellow:Go to Registration Page;
+    :Fill Registration Form|
+    - Username
+    - Email
+    - Password
+    - Full Name;
+    
+    :Submit Registration;
+    
+    if (Data valid?) then (yes)
+      #LightGreen:Create Account;
+      :Send Verification Email;
+      
+      :User Checks Email;
+      :Click Verification Link;
+      
+      if (Token valid?) then (yes)
+        #LightGreen:Account Verified ✓;
+        :Redirect to Login;
+        :Enter Credentials;
+        #LightGreen:Login Successful;
+      else (no)
+        #Pink:Verification Failed;
+        stop
+      endif
+      
+    else (no)
+      #Pink:Show Validation Errors;
+      stop
+    endif
+  endif
+  
+  #LightBlue:=== USER DASHBOARD ===;
+  
+  :View Dashboard Stats|
+  - Total Blogs
+  - Total Views
+  - Draft Count;
+  
+  :Click "Create New Blog";
+  
+  #LightGreen:=== BLOG EDITOR ===;
+  
+  :Fill Blog Form|
+  ━━━━━━━━━━━━━━━━
+  📝 Title
+  🖼️ Featured Image
+  📁 Category
+  🏷️ Tags
+  ✍️ Content (Rich Editor)
+  🔍 SEO Settings;
+  
+  if (Ready to publish?) then (yes)
+    :Click "Publish" Button;
+    
+    if (Form validation passed?) then (yes)
+      #LightGreen:Blog Published ✓;
+      :Show Success Message;
+      
+      :Blog appears on homepage;
+      
+      if (View published blog?) then (yes)
+        :Navigate to Blog Page;
+        :Display Blog Content;
+        note right
+          Blog is now visible
+          to all visitors
+        end note
+      else (no)
+        :Return to Dashboard;
+      endif
+      
+    else (no)
+      #Pink:Show Validation Errors;
+      :Fix form errors;
+      backward:Fill Blog Form;
+    endif
+    
+  else (no - Save as draft)
+    #LightYellow:Click "Save Draft";
+    :Save to Drafts;
+    :Return to Dashboard;
+    note right
+      User can edit
+      draft later
+    end note
+  endif
+  
+else (no - Just browsing)
+  :Browse Blogs;
+  :Click on Blog Post;
+  :Read Blog Content;
+  :View Comments;
+  :Share on Social Media;
+endif
+
+stop
+
+@enduml
